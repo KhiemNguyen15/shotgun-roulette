@@ -1,3 +1,4 @@
+import com.github.khiemnguyen15.DatabaseHelper;
 import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
@@ -6,8 +7,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Properties;
 
 void main() throws Exception {
@@ -19,10 +19,16 @@ void main() throws Exception {
         throw new Exception(errMsg);
     }
 
-    Connection conn = DriverManager.getConnection(databaseProps.getProperty("url"), databaseProps);
+    DatabaseHelper dbHelper = new DatabaseHelper();
+    try {
+        dbHelper.loadDatabase(databaseProps);
+    } catch (SQLException e) {
+        String errMsg = String.format("Error connecting to database: %s", e.getMessage());
+        throw new Exception(errMsg);
+    }
 
-    // Test code
-    System.out.printf("Database client info: %s%n", conn.getClientInfo());
+    Thread shutdownListener = new Thread(dbHelper::closeConnection);
+    Runtime.getRuntime().addShutdownHook(shutdownListener);
 
     Properties botProps = new Properties();
     try {
