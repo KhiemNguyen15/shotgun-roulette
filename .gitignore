@@ -66,4 +66,4 @@ bin/
 hs_err_pid*
 replay_pid*
 
-conf/
+*.properties
