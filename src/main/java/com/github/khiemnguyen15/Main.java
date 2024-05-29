@@ -6,18 +6,33 @@ import reactor.core.publisher.Mono;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.Properties;
 
-void main() {
-    Properties botProp = new Properties();
-
+void main() throws Exception {
+    Properties databaseProps = new Properties();
     try {
-        botProp.load(new FileInputStream("conf/bot.properties"));
+        databaseProps.load(new FileInputStream("conf/database.properties"));
     } catch (IOException e) {
-        e.printStackTrace();
+        String errMsg = String.format("Error loading database properties: %s", e.getMessage());
+        throw new Exception(errMsg);
     }
 
-    DiscordClient client = DiscordClient.create(botProp.getProperty("api_token"));
+    Connection conn = DriverManager.getConnection(databaseProps.getProperty("url"), databaseProps);
+
+    // Test code
+    System.out.printf("Database client info: %s%n", conn.getClientInfo());
+
+    Properties botProps = new Properties();
+    try {
+        botProps.load(new FileInputStream("conf/bot.properties"));
+    } catch (IOException e) {
+        String errMsg = String.format("Error loading bot properties: %s", e.getMessage());
+        throw new Exception(errMsg);
+    }
+
+    DiscordClient client = DiscordClient.create(botProps.getProperty("api_token"));
 
     Mono<Void> login = client.withGateway((GatewayDiscordClient gateway) ->
             gateway.on(ReadyEvent.class, event ->
