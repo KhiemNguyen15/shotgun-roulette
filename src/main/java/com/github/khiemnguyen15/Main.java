@@ -10,10 +10,12 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Properties;
 
+final String configPath = "src/main/resources";
+
 void main() throws Exception {
     Properties databaseProps = new Properties();
     try {
-        databaseProps.load(new FileInputStream("conf/database.properties"));
+        databaseProps.load(new FileInputStream(String.format("%s/database.properties", configPath)));
     } catch (IOException e) {
         String errMsg = String.format("Error loading database properties: %s", e.getMessage());
         throw new Exception(errMsg);
@@ -32,7 +34,7 @@ void main() throws Exception {
 
     Properties botProps = new Properties();
     try {
-        botProps.load(new FileInputStream("conf/bot.properties"));
+        botProps.load(new FileInputStream(String.format("%s/bot.properties", configPath)));
     } catch (IOException e) {
         String errMsg = String.format("Error loading bot properties: %s", e.getMessage());
         throw new Exception(errMsg);
